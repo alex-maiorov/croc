@@ -71,7 +71,7 @@ if { [info exists env(OPENROAD_PLACEMENT_DENSITY)] } {
 utl::report "Global Placement (1)"
 global_placement -density $placement_density
 report_metrics "02-02_${proj_name}.gpl1"
-report_image "02-02_${proj_name}.gpl1" true true
+# report_image "02-02_${proj_name}.gpl1" true true
 save_checkpoint 02-02_${proj_name}.gpl1
 
 utl::report "Estimate parasitics"
