@@ -163,8 +163,8 @@ utl::report "###################################################################
 source scripts/power_grid.tcl
 
 # Save checkpoint
-# save_checkpoint 01_${proj_name}.floorplan
-report_image "01_${proj_name}.floorplan" false
+save_checkpoint 01_${proj_name}.floorplan
+# report_image "01_${proj_name}.floorplan" false
 
 utl::report "###############################################################################"
 utl::report "# Stage 01 complete: Checkpoint saved to ${save_dir}/01_${proj_name}.floorplan.zip"
