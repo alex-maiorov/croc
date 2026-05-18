@@ -1,0 +1,48 @@
+[settings]
+enabled = true
+
+[shared]
+OVERFLOW = [0.1]
+PLAC_DENSITY = [0.60]
+
+[upstream_sweep]
+PLAC_DENSITY = [0.60, 0.65, 0.70]
+OVERFLOW = [0.1, 0.2, 0.3]
+
+[timing_sweep]
+TOP_N = [10, 100, 10000]
+PROJ_WEIGHT = [1.0, 0.01, 0.0001]
+E2E_WEIGHT = [1e-21, 1e-25, 1e-27]
+SHARPNESS = [1e12, 1e14, 1e16]
+OFFSET = [0.0]
+UPPER = [0.0, 1e-9]
+STA_INTERVAL = [5, 10, 25]
+FIRST_ITER = [250]
+
+[routability_sweep]
+SHARPNESS = [0.5, 1.0, 2.0]
+WEIGHT = [0.5, 1.0, 2.0]
+RANGE = [0.5, 1.0, 2.0]
+OFFSET = [0.0]
+FIRST_ITER = [0]
+INTERVAL = [5, 10]
+USE_GRT = [0, 1]
+
+[fixed_timing]
+TOP_N = 100
+PROJ_WEIGHT = 0.01
+E2E_WEIGHT = 1e-25
+SHARPNESS = 1e14
+OFFSET = 0.0
+UPPER = 0.0
+STA_INTERVAL = 10
+FIRST_ITER = 250
+
+[fixed_routability]
+SHARPNESS = 1.0
+WEIGHT = 1.0
+RANGE = 1.0
+OFFSET = 0.0
+FIRST_ITER = 0
+INTERVAL = 10
+USE_GRT = 0
