@@ -131,6 +131,9 @@ if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_RUN_INTERVAL)] } {
 
 utl::report "Global Placement (2)"
 
+utl::set_db_log_global_max_mem [expr 500 * 1024 * 1024]
+utl::start_log_db "reports/placement.sqlite"
+
 set gpl_args [list -density $placement_density \
                    -routability_driven \
                    -routability_check_overflow $routability_check_overflow \
@@ -161,6 +164,8 @@ if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_USE_GRT)] && $env(OPENROAD_R
 }
 
 global_placement {*}$gpl_args
+
+utl::stop_log_db
 
 
 utl::report "###############################################################################"
