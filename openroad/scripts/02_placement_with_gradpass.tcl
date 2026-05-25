@@ -41,10 +41,9 @@ if { [info exists env(OPENROAD_PLACEMENT_DENSITY)] } {
 }
 
 # Routability overflow
-set routability_check_overflow 0.30
+set placement_overflow 0.1
 if { [info exists env(OPENROAD_PLACEMENT_OVERFLOW)] } {
-    set routability_check_overflow $env(OPENROAD_PLACEMENT_OVERFLOW)
-    utl::report "Using routability overflow from environment: $routability_check_overflow"
+    set placement_overflow $env(OPENROAD_PLACEMENT_OVERFLOW)
 }
 
 # Timing Gradpass Variables Setup
@@ -58,12 +57,17 @@ if { [info exists env(OPENROAD_TIMING_GRADPASS_TOP_N)] } {
     set timing_gradpass_top_n $env(OPENROAD_TIMING_GRADPASS_TOP_N)
 }
 
-set timing_gradpass_proj_weight 1.0
+set timing_gradpass_n_paths_per_endpoint 1
+if { [info exists env(OPENROAD_TIMING_GRADPASS_N_PATHS_PER_ENDPOINT)] } {
+    set timing_gradpass_n_paths_per_endpoint $env(OPENROAD_TIMING_GRADPASS_N_PATHS_PER_ENDPOINT)
+}
+
+set timing_gradpass_proj_weight 1e-3
 if { [info exists env(OPENROAD_TIMING_GRADPASS_PROJ_WEIGHT)] } {
     set timing_gradpass_proj_weight $env(OPENROAD_TIMING_GRADPASS_PROJ_WEIGHT)
 }
 
-set timing_gradpass_end_to_end_weight 1.0
+set timing_gradpass_end_to_end_weight 1e-7
 if { [info exists env(OPENROAD_TIMING_GRADPASS_END_TO_END_WEIGHT)] } {
     set timing_gradpass_end_to_end_weight $env(OPENROAD_TIMING_GRADPASS_END_TO_END_WEIGHT)
 }
@@ -83,6 +87,16 @@ if { [info exists env(OPENROAD_TIMING_GRADPASS_SLACK_UPPER)] } {
     set timing_gradpass_slack_upper $env(OPENROAD_TIMING_GRADPASS_SLACK_UPPER)
 }
 
+set timing_gradpass_slack_clamp 1e32
+if { [info exists env(OPENROAD_TIMING_GRADPASS_SLACK_CLAMP)] } {
+    set timing_gradpass_slack_clamp $env(OPENROAD_TIMING_GRADPASS_SLACK_CLAMP)
+}
+
+set timing_gradpass_slack_slope 1e10
+if { [info exists env(OPENROAD_TIMING_GRADPASS_SLACK_SLOPE)] } {
+    set timing_gradpass_slack_slope $env(OPENROAD_TIMING_GRADPASS_SLACK_SLOPE)
+}
+
 set timing_gradpass_sta_run_interval 10
 if { [info exists env(OPENROAD_TIMING_GRADPASS_STA_RUN_INTERVAL)] } {
     set timing_gradpass_sta_run_interval $env(OPENROAD_TIMING_GRADPASS_STA_RUN_INTERVAL)
@@ -91,6 +105,26 @@ if { [info exists env(OPENROAD_TIMING_GRADPASS_STA_RUN_INTERVAL)] } {
 set timing_gradpass_first_iter 0
 if { [info exists env(OPENROAD_TIMING_GRADPASS_FIRST_ITER)] } {
     set timing_gradpass_first_iter $env(OPENROAD_TIMING_GRADPASS_FIRST_ITER)
+}
+
+set timing_gradpass_saturation_kl 3.0
+if { [info exists env(OPENROAD_TIMING_GRADPASS_SATURATION_KL)] } {
+    set timing_gradpass_saturation_kl $env(OPENROAD_TIMING_GRADPASS_SATURATION_KL)
+}
+
+set timing_gradpass_saturation_minl 1000.0
+if { [info exists env(OPENROAD_TIMING_GRADPASS_SATURATION_MINL)] } {
+    set timing_gradpass_saturation_minl $env(OPENROAD_TIMING_GRADPASS_SATURATION_MINL)
+}
+
+set timing_gradpass_precond_count_weight 0.1
+if { [info exists env(OPENROAD_TIMING_GRADPASS_PRECOND_COUNT_WEIGHT)] } {
+    set timing_gradpass_precond_count_weight $env(OPENROAD_TIMING_GRADPASS_PRECOND_COUNT_WEIGHT)
+}
+
+set timing_gradpass_blend 0.3
+if { [info exists env(OPENROAD_TIMING_GRADPASS_BLEND)] } {
+    set timing_gradpass_blend $env(OPENROAD_TIMING_GRADPASS_BLEND)
 }
 
 # Routability Gradpass Variables Setup
@@ -131,27 +165,33 @@ if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_RUN_INTERVAL)] } {
 
 utl::report "Global Placement (2)"
 
-utl::set_db_log_global_max_mem [expr 500 * 1024 * 1024]
+utl::set_db_log_global_max_mem [expr 1 * 1024 * 1024]
 utl::start_log_db "reports/placement.sqlite"
 
-set gpl_args [list -density $placement_density \
-                   -routability_driven \
-                   -routability_check_overflow $routability_check_overflow \
-                   -timing_driven]
+set gpl_args [list -density $placement_density -overflow $placement_overflow]
 
 if { $timing_gradpass_enable } {
+    lappend gpl_args -timing_driven
     lappend gpl_args -timing_gradpass_top_n $timing_gradpass_top_n \
+                     -timing_gradpass_n_paths_per_endpoint $timing_gradpass_n_paths_per_endpoint \
                      -timing_gradpass_proj_weight $timing_gradpass_proj_weight \
                      -timing_gradpass_end_to_end_weight $timing_gradpass_end_to_end_weight \
                      -timing_gradpass_slack_sharpness $timing_gradpass_slack_sharpness \
                      -timing_gradpass_slack_offset $timing_gradpass_slack_offset \
                      -timing_gradpass_slack_upper $timing_gradpass_slack_upper \
+                     -timing_gradpass_slack_clamp $timing_gradpass_slack_clamp \
+                     -timing_gradpass_slack_slope $timing_gradpass_slack_slope \
                      -timing_gradpass_sta_run_interval $timing_gradpass_sta_run_interval \
-                     -timing_gradpass_first_iter $timing_gradpass_first_iter
+                     -timing_gradpass_first_iter $timing_gradpass_first_iter \
+                     -timing_gradpass_saturation_kl $timing_gradpass_saturation_kl \
+                     -timing_gradpass_saturation_minl $timing_gradpass_saturation_minl \
+                     -timing_gradpass_precond_count_weight $timing_gradpass_precond_count_weight \
+                     -timing_gradpass_blend $timing_gradpass_blend
 }
 
 if { $routability_gradpass_enable } {
-    lappend gpl_args -routability_gradpass_sharpness $routability_gradpass_sharpness \
+    lappend gpl_args -routability_driven \
+                     -routability_gradpass_sharpness $routability_gradpass_sharpness \
                      -routability_gradpass_weight $routability_gradpass_weight \
                      -routability_gradpass_range $routability_gradpass_range \
                      -routability_gradpass_offset $routability_gradpass_offset \
@@ -162,6 +202,8 @@ if { $routability_gradpass_enable } {
 if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_USE_GRT)] && $env(OPENROAD_ROUTABILITY_GRADPASS_USE_GRT) == 1 } {
     lappend gpl_args -routability_gradpass_use_grt
 }
+
+puts "DEBUG: gpl_args is $gpl_args"
 
 global_placement {*}$gpl_args
 
