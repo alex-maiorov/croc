@@ -138,19 +138,29 @@ if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_SHARPNESS)] } {
     set routability_gradpass_sharpness $env(OPENROAD_ROUTABILITY_GRADPASS_SHARPNESS)
 }
 
-set routability_gradpass_weight 1.0
-if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_WEIGHT)] } {
-    set routability_gradpass_weight $env(OPENROAD_ROUTABILITY_GRADPASS_WEIGHT)
+set routability_gradpass_slope 1.0
+if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_SLOPE)] } {
+    set routability_gradpass_slope $env(OPENROAD_ROUTABILITY_GRADPASS_SLOPE)
 }
 
-set routability_gradpass_range 1.0
-if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_RANGE)] } {
-    set routability_gradpass_range $env(OPENROAD_ROUTABILITY_GRADPASS_RANGE)
+set routability_gradpass_clamp 10.0
+if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_CLAMP)] } {
+    set routability_gradpass_clamp $env(OPENROAD_ROUTABILITY_GRADPASS_CLAMP)
 }
 
-set routability_gradpass_offset 0.0
+set routability_gradpass_offset 0.3
 if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_OFFSET)] } {
     set routability_gradpass_offset $env(OPENROAD_ROUTABILITY_GRADPASS_OFFSET)
+}
+
+set routability_gradpass_precond_weight 0.1
+if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_PRECOND_WEIGHT)] } {
+    set routability_gradpass_precond_weight $env(OPENROAD_ROUTABILITY_GRADPASS_PRECOND_WEIGHT)
+}
+
+set routability_gradpass_range 100000
+if { [info exists env(OPENROAD_ROUTABILITY_GRADPASS_RANGE)] } {
+    set routability_gradpass_range $env(OPENROAD_ROUTABILITY_GRADPASS_RANGE)
 }
 
 set routability_gradpass_first_iter 0
@@ -192,9 +202,11 @@ if { $timing_gradpass_enable } {
 if { $routability_gradpass_enable } {
     lappend gpl_args -routability_driven \
                      -routability_gradpass_sharpness $routability_gradpass_sharpness \
-                     -routability_gradpass_weight $routability_gradpass_weight \
-                     -routability_gradpass_range $routability_gradpass_range \
+                     -routability_gradpass_slope $routability_gradpass_slope \
+                     -routability_gradpass_clamp $routability_gradpass_clamp \
                      -routability_gradpass_offset $routability_gradpass_offset \
+                     -routability_gradpass_precond_weight $routability_gradpass_precond_weight \
+                     -routability_gradpass_range $routability_gradpass_range \
                      -routability_gradpass_first_iter $routability_gradpass_first_iter \
                      -routability_gradpass_run_interval $routability_gradpass_run_interval
 }
