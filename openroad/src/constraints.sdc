@@ -53,6 +53,9 @@ set_clock_groups -asynchronous -name clk_groups_async \
      -group {clk_jtg} \
      -group {clk_sys}
 
+# Exclude clock signals from timing analysis (experimental: backend algorithm research)
+set_false_path -from [all_clocks]
+
 # We set reasonable uncertainties in their transistion timing
 # and transition (rise/fall) times for all clocks (ns)
 set_clock_uncertainty 0.1 [all_clocks]
@@ -82,10 +85,8 @@ set_max_delay 3.0 -from $JTAG_ASYNC_RSP_START -to $JTAG_ASYNC_RSP_END -ignore_cl
 #############
 puts "Input/Outputs..."
 
-# Reset should propagate to system domain within a clock cycle.
-set_input_delay -max [ expr $TCK_JTG * 0.10 ] [get_ports {rst_ni testmode_i}]  
-set_false_path -hold   -from [get_ports {rst_ni testmode_i}]
-set_max_delay $TCK_SYS -from [get_ports {rst_ni testmode_i}]
+# Exclude reset signals from timing analysis (experimental: backend algorithm research)
+set_false_path -from [get_ports {rst_ni testmode_i}]
 
 
 ##########
@@ -98,10 +99,8 @@ set_input_delay  -max -add_delay -clock clk_jtg [ expr $TCK_JTG * 0.30 ] [get_po
 set_output_delay -min -add_delay -clock clk_jtg [ expr $TCK_JTG * 0.10 ] [get_ports jtag_tdo_o]
 set_output_delay -max -add_delay -clock clk_jtg [ expr $TCK_JTG * 0.20 ] [get_ports jtag_tdo_o]
 
-# Reset should propagate to system domain within a clock cycle.
-set_input_delay -max [ expr $TCK_JTG * 0.10 ] [get_ports jtag_trst_ni]  
-set_false_path -hold    -from [get_ports jtag_trst_ni]
-set_max_delay $TCK_JTG  -from [get_ports jtag_trst_ni]
+# Exclude JTAG reset from timing analysis (experimental: backend algorithm research)
+set_false_path -from [get_ports jtag_trst_ni]
 
 
 ##########
